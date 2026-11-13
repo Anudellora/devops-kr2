@@ -1,5 +1,32 @@
-# KR2 template
+# Контрольная работа № 2
 
-Counter service on Flask + Redis.
+Вариант 2: Савельев Антон Алексеевич, группа ЭФБО-12-24, номер 22.
+Публичный адрес: `https://notes.devops.local/`.
 
-Local run: `pip install -r requirements.txt && flask --app app run`
+Исходный шаблон преподавателя: https://gitverse.ru/dgimatdinov/kr2-template.
+Файлы исходного состояния воспроизведены по опубликованной версии шаблона;
+доступ к GitVerse через Git с этого компьютера отсутствовал. Приложение
+`app.py` и перечень зависимостей из шаблона сохранены без изменения логики.
+
+## Развёртывание
+
+1. Доставить проект в `/home/devops/kr2` через `rsync -avz --delete
+   --exclude=.env --exclude=.git`, сначала с `--dry-run`.
+2. На сервере один раз создать `.env` с `REDIS_PASSWORD`, используя
+   `openssl rand -hex 16`, и установить права `600` и владельца `devops`.
+   Реальный пароль не хранится в репозитории.
+3. Выполнить `docker compose up -d --build` из `/home/devops/kr2`.
+4. Установить `config/nginx/kr2.conf` как
+   `/etc/nginx/sites-available/kr2`, создать символическую ссылку в
+   `sites-enabled`, выпустить отдельный сертификат с SAN
+   `DNS:notes.devops.local`, проверить `nginx -t` и перезагрузить Nginx.
+5. Добавить на хосте запись `127.0.0.1 notes.devops.local` в `hosts`
+   при использовании NAT-проброса VirtualBox.
+
+Приложение слушает `0.0.0.0:8002` внутри контейнера, а Docker публикует порт
+только на `127.0.0.1:8002` сервера. Redis доступен только в сети `backend`.
+Именованный том `redis_data` сохраняет счётчик после `docker compose down`.
+Команду `down -v` для контрольной работы не применять.
+
+Сертификат самоподписанный. Для проверки из командной строки используйте
+`curl --cacert kr2.crt https://notes.devops.local/`.
