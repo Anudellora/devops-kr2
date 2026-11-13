@@ -1,3 +1,4 @@
+# KR2: Savelyev
 import os
 import socket
 
